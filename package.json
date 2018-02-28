@@ -1,0 +1,29 @@
+{
+  "name": "homebridge-teufel",
+  "version": "0.0.1",
+  "description": "Homebridge plugin for Teufel and Raumfeld devices support",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marcus Thormählen <marcus@rocketguy.de> (http://rocketguy.de)",
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "node-raumserver": "^0.1.4",
+    "request": "^2.65.0"
+  },
+  "devDependencies": {
+    "homebridge": ">=0.2.0"
+  },
+  "engines": {
+    "node": ">=0.12.0",
+    "homebridge": ">=0.2.0"
+  },
+  "keywords": [
+    "Homebridge",
+    "homebridge-plugin",
+    "Raumfeld",
+    "Teufel",
+    "Raumserver"
+  ]
+}
