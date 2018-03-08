@@ -25,5 +25,10 @@
     "Raumfeld",
     "Teufel",
     "Raumserver"
-  ]
+  ],
+  "bugs": {
+    "url": "https://github.com/ashleygwilliams/my_package/issues"
+  },
+  "homepage": "https://github.com/ashleygwilliams/my_package"
+
 }

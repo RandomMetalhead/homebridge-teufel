@@ -5,13 +5,12 @@ var RaumkernelLib = require('node-raumkernel');
 var Accessory, Service, Characteristic, UUIDGen;
 
 module.exports = function (homebridge) {
-    console.log("homebridge API version: " + homebridge.version);
+    console.log("Starting Teufel device discovery");
 
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
     Accessory = homebridge.platformAccessory;
     UUIDGen = homebridge.hap.uuid;
-
 
     homebridge.registerPlatform("homebridge-teufel", "Teufel", TeufelPlatform, true);
 }
@@ -43,11 +42,6 @@ function TeufelPlatform(log, config, api) {
         self.raumkernel.on("zoneConfigurationChanged", function (zoneConfiguration) {
             self.addAccessory("Virtual Zone", zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn);
         });
-
-        self.raumkernel.on("rendererStateKeyValueChanged", function (mediaRenderer, key, oldValue, newValue) {
-            self.getSwitchState(mediaRenderer, key, oldValue, newValue)
-        });
-
     }.bind(this));
 }
 
@@ -59,6 +53,9 @@ TeufelPlatform.prototype.addAccessory = function (accessoryName, deviceUdn) {
 
     newAccessory.context.name = accessoryName
     newAccessory.context.deviceUdn = deviceUdn;
+
+    console.log("Found Teufel device " + newAccessory.displayName + ", processing.");
+    console.log("Please make sure, that all Teufel devices have unique names!");
 
     // If device already added, don´t add again. We rely on unique names here!
     var arrayLength = this.accessories.length;
@@ -80,7 +77,7 @@ TeufelPlatform.prototype.addAccessory = function (accessoryName, deviceUdn) {
 
 TeufelPlatform.prototype.configureAccessory = function (accessory) {
     this.log(accessory.displayName, "Configure Accessory");
-    this.getSwitchService(accessory);
+    this.addSwitchService(accessory);
     this.accessories.push(accessory);
 }
 
@@ -94,61 +91,57 @@ TeufelPlatform.prototype.addSwitchService = function (accessory) {
 
     accessory.reachable = true;
 
-    accessory.addService(Service.Switch)
-        .getCharacteristic(Characteristic.On)
-        .on('set', function (value, callback) {
-            console.log(accessory.displayName, "Teufel Device -> " + value);
-            callback();
-            self.changeRaumfeldState(accessory, value)
-        });
-}
-
-TeufelPlatform.prototype.getSwitchService = function (accessory) {
-    var self = this;
-    accessory.on('identify', function (paired, callback) {
-        console.log("identify " + accessory.displayName + " - is paired: " + paired);
-        callback();
-    });
-
-    accessory.reachable = true;
-
-    // TODO: maybe add if for addservice if getService null?
     if (accessory.getService(Service.Switch)) {
         accessory.getService(Service.Switch)
             .getCharacteristic(Characteristic.On)
+            .on('get', function (callback) {
+                if (callback) callback(null, self.getSwitchState(accessory));
+            })
             .on('set', function (value, callback) {
-                console.log(accessory.displayName, "Teufel Device -> " + value);
-                callback();
-                self.changeRaumfeldState(accessory, value)
+                if (callback) callback(null, self.changeRaumfeldState(accessory, value));
+            });
+    } else {
+        accessory.addService(Service.Switch)
+            .getCharacteristic(Characteristic.On)
+            .on('get', function (callback) {
+                if (callback) callback(null, self.getSwitchState(accessory));
+            })
+            .on('set', function (value, callback) {
+                if (callback) callback(null, self.changeRaumfeldState(accessory, value));
             });
     }
 }
 
-TeufelPlatform.prototype.getSwitchState = function (mediaRenderer, key, oldValue, newValue) {
+TeufelPlatform.prototype.getSwitchState = function (accessory) {
     var self = this;
 
-    if (key === "TransportState") {
-        switch (newValue) {
-            case "STOPPED":
-                console.log("Play stopped");
+    var zoneId = accessory.context.deviceUdn;
+    var name = accessory.displayName;
+    var mediaServer = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
+
+    for (var i = 0; i < mediaServer.zoneConfig.zones[0].zone[0].room.length; i++) {
+        if (mediaServer.zoneConfig.zones[0].zone[0].room[i].renderer[0].$.udn === zoneId) {
+            var powerstate = mediaServer.zoneConfig.zones[0].zone[0].room[i].$.powerState;
+            if (powerstate !== 'ACTIVE') {
                 return false;
-                break;
-            case "PLAYING":
-                console.log("Play started");
+            } else {
                 return true;
-                break;
-            default:
-                console.log("unknown command")
+            }
         }
     }
+
+    return false;
+
 }
 
 TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
+    var self = this;
+
     var zoneId = accessory.context.deviceUdn;
     var name = accessory.displayName;
-    this.log("Changing state of " + name + " and zoneId " + zoneId + " to " + state);
-    var self = this;
     var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
+
+    this.log("Changing state of " + name + " and zoneId " + zoneId + " to " + state);
 
     if (state) {
         mediaRenderer.play().then(function (_data) {
@@ -160,11 +153,6 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
         });
     }
 }
-
-TeufelPlatform.prototype.setSwitch = function (accessory, state) {
-    accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(state, undefined);
-}
-
 
 TeufelPlatform.prototype.removeAccessory = function () {
     this.log("Remove Accessory");
