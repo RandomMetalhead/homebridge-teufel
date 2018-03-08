@@ -23,13 +23,14 @@
   "keywords": [
     "Homebridge",
     "homebridge-plugin",
+    "homebridge-teufel",
     "Raumfeld",
     "Teufel",
     "Raumserver"
   ],
   "bugs": {
-    "url": "https://github.com/ashleygwilliams/my_package/issues"
+    "url": "https://github.com/RandomMetalhead/homebridge-teufel/issues"
   },
-  "homepage": "https://github.com/ashleygwilliams/my_package"
+  "homepage": "https://github.com/RandomMetalhead"
 
 }
