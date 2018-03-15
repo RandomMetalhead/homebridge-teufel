@@ -149,17 +149,17 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
     var name = accessory.displayName;
     var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
 
-    this.log("Changing state of " + name + " and zoneId " + zoneId + " to " + state);
+    // this.log("Changing state of " + name + " and zoneId " + zoneId + " to " + state);
 
     if (state) {
         mediaRenderer.play().then(function (_data) {
-            this.log("Start playing: " + _data)
+            // this.log("Start playing: " + _data)
 
         });
     } else {
         // TODO: do not stop playing, but send device to standby to preserve running virtual zone
         mediaRenderer.stop().then(function (_data) {
-            this.log("Stop playing: " + _data)
+            // this.log("Stop playing: " + _data)
         });
     }
 }
