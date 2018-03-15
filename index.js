@@ -5,8 +5,6 @@ var RaumkernelLib = require('node-raumkernel');
 var Accessory, Service, Characteristic, UUIDGen;
 
 module.exports = function (homebridge) {
-    console.log("Starting Teufel device discovery");
-
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
     Accessory = homebridge.platformAccessory;
@@ -54,19 +52,19 @@ TeufelPlatform.prototype.addAccessory = function (accessoryName, deviceUdn) {
     newAccessory.context.name = accessoryName
     newAccessory.context.deviceUdn = deviceUdn;
 
-    console.log("Found Teufel device " + newAccessory.displayName + ", processing.");
-    console.log("Please make sure, that all Teufel devices have unique names!");
+    this.log("Found Teufel device " + newAccessory.displayName + ", processing.");
+    //this.log("Please make sure, that all Teufel devices have unique names!");
 
     // If device already added, don´t add again. We rely on unique names here!
     var arrayLength = this.accessories.length;
     for (var i = 0; i < arrayLength; i++) {
         if (this.accessories[i].displayName === newAccessory.displayName) {
             if (newAccessory.displayName === "Virtual Zone") {
-                console.log("Its not a new device, but a new virtual zone, updating udn to " + deviceUdn);
+                this.log("Its not a new device, but a new virtual zone, updating udn to " + deviceUdn);
                 this.accessories[i].context.deviceUdn = deviceUdn;
                 return;
             } else {
-                console.log("Teufel " + newAccessory.displayName + " device already added, skipping");
+                this.log("Teufel " + newAccessory.displayName + " device already added, skipping");
                 return;
             }
         }
@@ -85,7 +83,7 @@ TeufelPlatform.prototype.configureAccessory = function (accessory) {
 TeufelPlatform.prototype.addSwitchService = function (accessory) {
     var self = this;
     accessory.on('identify', function (paired, callback) {
-        console.log(accessory, "Identify!!!");
+        this.log(accessory, "Identify!!!");
         callback();
     });
 
@@ -155,13 +153,13 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
 
     if (state) {
         mediaRenderer.play().then(function (_data) {
-            console.log("Start playing: " + _data)
+            this.log("Start playing: " + _data)
 
         });
     } else {
         // TODO: do not stop playing, but send device to standby to preserve running virtual zone
         mediaRenderer.stop().then(function (_data) {
-            console.log("Stop playing: " + _data)
+            this.log("Stop playing: " + _data)
         });
     }
 }
