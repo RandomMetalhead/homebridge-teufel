@@ -20,6 +20,10 @@
     "node": ">=0.12.0",
     "homebridge": ">=0.2.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RandomMetalhead/homebridge-teufel.git"
+  },
   "keywords": [
     "Homebridge",
     "homebridge-plugin",
