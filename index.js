@@ -117,21 +117,31 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
 
     var zoneId = accessory.context.deviceUdn;
     var name = accessory.displayName;
-    var mediaServer = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
 
-    for (var i = 0; i < mediaServer.zoneConfig.zones[0].zone[0].room.length; i++) {
-        if (mediaServer.zoneConfig.zones[0].zone[0].room[i].renderer[0].$.udn === zoneId) {
-            var powerstate = mediaServer.zoneConfig.zones[0].zone[0].room[i].$.powerState;
-            if (powerstate !== 'ACTIVE') {
-                return false;
+    if (name === "Virtual Zone") {
+        var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
+        virtualZoneConfigProvider.getTransportInfo().then(function(_data){
+            if (_data.CurrentTransportState !== 'PLAYING') {
+                accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
             } else {
-                return true;
+                accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
+            }
+        });
+    } else {
+        var zoneConfigProvider = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
+        var zoneJson = zoneConfigProvider.zoneConfig.zones[0].zone[0];
+
+        for (var i = 0; i < zoneJson.room.length; i++) {
+            if (zoneJson.room[i].renderer[0].$.udn === zoneId) {
+                var powerstate = zoneJson.room[i].$.powerState;
+                if (powerstate !== 'ACTIVE') {
+                    return false;
+                } else {
+                    return true;
+                }
             }
         }
     }
-
-    return false;
-
 }
 
 TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
@@ -145,11 +155,13 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
 
     if (state) {
         mediaRenderer.play().then(function (_data) {
-            console.log("Start playing")
+            console.log("Start playing: " + _data)
+
         });
     } else {
+        // TODO: do not stop playing, but send device to standby to preserve running virtual zone
         mediaRenderer.stop().then(function (_data) {
-            console.log("Stop playing")
+            console.log("Stop playing: " + _data)
         });
     }
 }
