@@ -46,12 +46,12 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
         var newAccessoryDisplayName = rooms[i].renderer[0].$.name;
         var alreadyAdded = false;
 
-        this.log("******* Found new accessory in room " + rooms[i].$.name + ", name " + newAccessoryDisplayName)
+        // this.log("******* Found new accessory in room " + rooms[i].$.name + ", name " + newAccessoryDisplayName)
 
         // Check if Accessory already added
         for (var j = 0; j < knownAccessoriesLength; j++) {
             if (this.accessories[j].displayName === newAccessoryDisplayName) {
-                this.log("Teufel " + newAccessoryDisplayName + " device already added, only updating meta data");
+                // this.log("Teufel " + newAccessoryDisplayName + " device already added, only updating meta data");
                 this.accessories[j].context.deviceName = rooms[i].renderer[0].$.name;
                 this.accessories[j].context.deviceUdn = rooms[i].renderer[0].$.udn;
                 this.accessories[j].context.roomName = rooms[i].$.name;
@@ -92,7 +92,7 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
         if (this.accessories[j].displayName === virtualZoneName) {
             this.log("Its not a new device, but a new virtual zone, updating udn to " + virtualZoneUdn);
             for (var k = 0; k < knownAccessoriesLength; k++) {
-                    this.log("Updating virtual zone udn for accessory " + this.accessories[k].displayName);
+                    // this.log("Updating virtual zone udn for accessory " + this.accessories[k].displayName);
                     this.accessories[k].context.zoneUdn = virtualZoneUdn;
             }
             alreadyAdded = true;
