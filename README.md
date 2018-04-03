@@ -18,8 +18,5 @@ Finally, you can the setup with `homebridge`.
 Homebridge should show your devices and one switch called "Virtual Zone". Currently I assume, that there is only one Zone playing music.
 Will work on that in the future.
 
-### Know Bugs
-- Switching one device off turns the Virtual-Zone off, too
-
 ### Features
 Currently, only play/pause are supported.
