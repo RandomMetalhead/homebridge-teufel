@@ -28,49 +28,97 @@ function TeufelPlatform(log, config, api) {
     var self = this;
 
     this.api.on('didFinishLaunching', function () {
-        self.raumkernel.on("mediaRendererRaumfeldAdded", function (deviceUdn, device) {
-            self.addAccessory(device.name(), deviceUdn);
-        });
-
-        self.raumkernel.on("mediaRendererRaumfeldVirtualAdded", function (deviceUdn, device) {
-            //currently only one zone supported! Otherwise, UUID would change
-            self.addAccessory("Virtual Zone", deviceUdn);
-        });
-
         self.raumkernel.on("zoneConfigurationChanged", function (zoneConfiguration) {
-            self.addAccessory("Virtual Zone", zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn);
+            if (zoneConfiguration !== null) {
+                self.addAccessory(zoneConfiguration);
+                self.addVirtualZone(zoneConfiguration);
+            }
         });
     }.bind(this));
 }
 
-TeufelPlatform.prototype.addAccessory = function (accessoryName, deviceUdn) {
-    var uuid = UUIDGen.generate(accessoryName);
-    var newAccessory = new Accessory(accessoryName, uuid);
+TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
+    var rooms = zoneConfiguration.zoneConfig.zones[0].zone[0].room;
+    var knownAccessoriesLength = this.accessories.length;
 
-    this.addSwitchService(newAccessory);
+    // Check for new Speakers in rooms
+    for (var i = 0; i < rooms.length; i++) {
+        var newAccessoryDisplayName = rooms[i].renderer[0].$.name;
+        var alreadyAdded = false;
 
-    newAccessory.context.name = accessoryName
-    newAccessory.context.deviceUdn = deviceUdn;
+        this.log("******* Found new accessory in room " + rooms[i].$.name + ", name " + newAccessoryDisplayName)
 
-    this.log("Found Teufel device " + newAccessory.displayName + ", processing.");
-    //this.log("Please make sure, that all Teufel devices have unique names!");
-
-    // If device already added, don´t add again. We rely on unique names here!
-    var arrayLength = this.accessories.length;
-    for (var i = 0; i < arrayLength; i++) {
-        if (this.accessories[i].displayName === newAccessory.displayName) {
-            if (newAccessory.displayName === "Virtual Zone") {
-                this.log("Its not a new device, but a new virtual zone, updating udn to " + deviceUdn);
-                this.accessories[i].context.deviceUdn = deviceUdn;
-                return;
-            } else {
-                this.log("Teufel " + newAccessory.displayName + " device already added, skipping");
-                return;
+        // Check if Accessory already added
+        for (var j = 0; j < knownAccessoriesLength; j++) {
+            if (this.accessories[j].displayName === newAccessoryDisplayName) {
+                this.log("Teufel " + newAccessoryDisplayName + " device already added, only updating meta data");
+                this.accessories[j].context.deviceName = rooms[i].renderer[0].$.name;
+                this.accessories[j].context.deviceUdn = rooms[i].renderer[0].$.udn;
+                this.accessories[j].context.roomName = rooms[i].$.name;
+                this.accessories[j].context.roomUdn = rooms[i].$.udn;
+                this.accessories[j].context.zoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
+                alreadyAdded = true;
+                break;
             }
         }
+
+        if (!alreadyAdded) {
+            this.log("Found Teufel device " + newAccessoryDisplayName + ", processing.");
+
+            var uuid = UUIDGen.generate(rooms[i].renderer[0].$.name);
+            var newAccessory = new Accessory(newAccessoryDisplayName, uuid);
+            var informationService = newAccessory.getService(Service.AccessoryInformation);
+
+            informationService
+                .setCharacteristic(Characteristic.Manufacturer, "Raumfeld / Teufel")
+                .setCharacteristic(Characteristic.Model, "");
+
+            this.addSwitchService(newAccessory);
+            this.accessories.push(newAccessory);
+            this.api.registerPlatformAccessories("homebridge-teufel", "Teufel", [newAccessory]);
+        }
     }
-    this.accessories.push(newAccessory);
-    this.api.registerPlatformAccessories("homebridge-teufel", "Teufel", [newAccessory]);
+}
+
+
+TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
+    var virtualZoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
+    var virtualZoneName = "Virtual Zone";
+    var knownAccessoriesLength = this.accessories.length;
+    var alreadyAdded = false;
+
+    // Check if Accessory already added
+    for (var j = 0; j < knownAccessoriesLength; j++) {
+        if (this.accessories[j].displayName === virtualZoneName) {
+            this.log("Its not a new device, but a new virtual zone, updating udn to " + virtualZoneUdn);
+            for (var k = 0; k < knownAccessoriesLength; k++) {
+                    this.log("Updating virtual zone udn for accessory " + this.accessories[k].displayName);
+                    this.accessories[k].context.zoneUdn = virtualZoneUdn;
+            }
+            alreadyAdded = true;
+        }
+    }
+
+    if (!alreadyAdded) {
+        this.log("Creating virtual Zone, processing.");
+
+        var uuid = UUIDGen.generate(virtualZoneName);
+        var newAccessory = new Accessory(virtualZoneName, uuid);
+        var informationService = newAccessory.getService(Service.AccessoryInformation);
+
+        newAccessory.context.deviceName = virtualZoneName;
+        newAccessory.context.deviceUdn = virtualZoneUdn;
+        newAccessory.context.roomName = "";
+        newAccessory.context.roomUdn = "";
+
+        informationService
+            .setCharacteristic(Characteristic.Manufacturer, "Raumfeld / Teufel")
+            .setCharacteristic(Characteristic.Model, "");
+
+        this.addSwitchService(newAccessory);
+        this.accessories.push(newAccessory);
+        this.api.registerPlatformAccessories("homebridge-teufel", "Teufel", [newAccessory]);
+    }
 }
 
 TeufelPlatform.prototype.configureAccessory = function (accessory) {
@@ -79,11 +127,10 @@ TeufelPlatform.prototype.configureAccessory = function (accessory) {
     this.accessories.push(accessory);
 }
 
-
 TeufelPlatform.prototype.addSwitchService = function (accessory) {
     var self = this;
     accessory.on('identify', function (paired, callback) {
-        this.log(accessory, "Identify!!!");
+        // this.log(accessory, "Identify!!!");
         callback();
     });
 
@@ -118,7 +165,7 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
 
     if (name === "Virtual Zone") {
         var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
-        virtualZoneConfigProvider.getTransportInfo().then(function(_data){
+        virtualZoneConfigProvider.getTransportInfo().then(function (_data) {
             if (_data.CurrentTransportState !== 'PLAYING') {
                 accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
             } else {
@@ -144,23 +191,30 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
 
 TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
     var self = this;
-
-    var zoneId = accessory.context.deviceUdn;
-    var name = accessory.displayName;
     var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
 
-    // this.log("Changing state of " + name + " and zoneId " + zoneId + " to " + state);
-
-    if (state) {
-        mediaRenderer.play().then(function (_data) {
-            // this.log("Start playing: " + _data)
-
-        });
-    } else {
-        // TODO: do not stop playing, but send device to standby to preserve running virtual zone
-        mediaRenderer.stop().then(function (_data) {
-            // this.log("Stop playing: " + _data)
-        });
+    if (mediaRenderer !== null) {
+        if (state) {
+            if (accessory.displayName === "Virtual Zone") {
+                mediaRenderer.play().then(function (_data) {
+                });
+            } else {
+                mediaRenderer.leaveStandby(accessory.context.roomUdn).then(function (_data) {
+                    mediaRenderer.play().then(function (_data) {
+                        self.raumkernel.managerDisposer.zoneManager.connectRoomToZone(accessory.context.roomUdn, accessory.context.zoneUdn).then(function (_data) {
+                        });
+                    });
+                });
+            }
+        } else {
+            if (accessory.displayName === "Virtual Zone") {
+                mediaRenderer.stop().then(function (_data) {
+                });
+            } else {
+                mediaRenderer.enterManualStandby(accessory.context.roomUdn).then(function (_data) {
+                });
+            }
+        }
     }
 }
 

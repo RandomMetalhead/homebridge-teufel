@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (2018-04-03)
+- Speaker-Switches now put speakers to stand-by directly
+- Switching on speakers will add them to the currently playing "Virtual Zone" automatically
+
 ## 0.0.5 (2018-03-15)
 - "Virtual Zone"-Switch working
 - Updated console.log to homebridge-log-system
