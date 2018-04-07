@@ -93,8 +93,7 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
                 this.api.unregisterPlatformAccessories("homebridge-teufel", "Teufel", [this.accessories[l]]);
                 delete this.accessories[l];
             }
-        }
-        catch
+        } catch
             (err) {
             this.log("Something went wrong deleting device " + this.accessories[l].context.deviceName);
         }
@@ -214,26 +213,30 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
     var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
 
     if (mediaRenderer !== null) {
-        if (state) {
-            if (accessory.displayName === "Virtual Zone") {
-                mediaRenderer.play().then(function (_data) {
-                });
-            } else {
-                mediaRenderer.leaveStandby(accessory.context.roomUdn).then(function (_data) {
+        try {
+            if (state) {
+                if (accessory.displayName === "Virtual Zone") {
                     mediaRenderer.play().then(function (_data) {
-                        self.raumkernel.managerDisposer.zoneManager.connectRoomToZone(accessory.context.roomUdn, accessory.context.zoneUdn).then(function (_data) {
+                    });
+                } else {
+                    mediaRenderer.leaveStandby(accessory.context.roomUdn).then(function (_data) {
+                        mediaRenderer.play().then(function (_data) {
+                            self.raumkernel.managerDisposer.zoneManager.connectRoomToZone(accessory.context.roomUdn, accessory.context.zoneUdn).then(function (_data) {
+                            });
                         });
                     });
-                });
-            }
-        } else {
-            if (accessory.displayName === "Virtual Zone") {
-                mediaRenderer.stop().then(function (_data) {
-                });
+                }
             } else {
-                mediaRenderer.enterManualStandby(accessory.context.roomUdn).then(function (_data) {
-                });
+                if (accessory.displayName === "Virtual Zone") {
+                    mediaRenderer.stop().then(function (_data) {
+                    });
+                } else {
+                    mediaRenderer.enterManualStandby(accessory.context.roomUdn).then(function (_data) {
+                    });
+                }
             }
+        } catch (err) {
+            this.log("Something went wrong while communicating with Raumfeld devices, maybe not reachable? Waiting for automatic Udn update...")
         }
     }
 }
