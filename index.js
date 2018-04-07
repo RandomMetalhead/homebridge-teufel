@@ -236,7 +236,7 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
                 }
             }
         } catch (err) {
-            this.log("Something went wrong while communicating with Raumfeld devices, maybe not reachable? Waiting for automatic Udn update...")
+            this.log("Something went wrong while communicating with Raumfeld / Teufel devices, maybe not reachable? Waiting for automatic Udn update...")
         }
     }
 }
