@@ -87,15 +87,16 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
     }
 
     for (var l = 0; l < knownAccessoriesLength; l++) {
-        if (this.accessories[l].context.shouldBeDeleted) {
-            try {
+        try {
+            if (this.accessories[l].context.shouldBeDeleted) {
                 this.log("Going to delete device with name " + this.accessories[l].context.deviceName + ", not existing any more in any zone");
                 this.api.unregisterPlatformAccessories("homebridge-teufel", "Teufel", [this.accessories[l]]);
                 delete this.accessories[l];
             }
-            catch (err) {
-                this.log("Something went wrong deleting device " + this.accessories[l].context.deviceName);
-            }
+        }
+        catch
+            (err) {
+            this.log("Something went wrong deleting device " + this.accessories[l].context.deviceName);
         }
     }
 }

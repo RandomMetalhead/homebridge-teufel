@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.2 (2018-04-07)
+## 0.1.3 (2018-04-07)
 - Correctly deleting speakers which do not exist anymore or have changed names
 
 ## 0.1.1 (2018-04-03)
