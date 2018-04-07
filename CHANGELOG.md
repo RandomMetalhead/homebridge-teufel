@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.2 (2018-04-07)
+- Correctly deleting speakers which do not exist anymore or have changed names
+
 ## 0.1.1 (2018-04-03)
 - Speaker-Switches now put speakers to stand-by directly
 - Switching on speakers will add them to the currently playing "Virtual Zone" automatically

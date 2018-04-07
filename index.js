@@ -3,6 +3,7 @@
 var RaumkernelLib = require('node-raumkernel');
 
 var Accessory, Service, Characteristic, UUIDGen;
+var virtualZoneName = "Virtual Zone";
 
 module.exports = function (homebridge) {
     Service = homebridge.hap.Service;
@@ -41,22 +42,28 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
     var rooms = zoneConfiguration.zoneConfig.zones[0].zone[0].room;
     var knownAccessoriesLength = this.accessories.length;
 
+    for (var k = 0; k < knownAccessoriesLength; k++) {
+        if (this.accessories[k].displayName === virtualZoneName) {
+            this.accessories[k].context.shouldBeDeleted = false;
+        } else {
+            this.accessories[k].context.shouldBeDeleted = true;
+        }
+    }
+
     // Check for new Speakers in rooms
     for (var i = 0; i < rooms.length; i++) {
         var newAccessoryDisplayName = rooms[i].renderer[0].$.name;
         var alreadyAdded = false;
 
-        // this.log("******* Found new accessory in room " + rooms[i].$.name + ", name " + newAccessoryDisplayName)
-
         // Check if Accessory already added
         for (var j = 0; j < knownAccessoriesLength; j++) {
             if (this.accessories[j].displayName === newAccessoryDisplayName) {
-                // this.log("Teufel " + newAccessoryDisplayName + " device already added, only updating meta data");
                 this.accessories[j].context.deviceName = rooms[i].renderer[0].$.name;
                 this.accessories[j].context.deviceUdn = rooms[i].renderer[0].$.udn;
                 this.accessories[j].context.roomName = rooms[i].$.name;
                 this.accessories[j].context.roomUdn = rooms[i].$.udn;
                 this.accessories[j].context.zoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
+                this.accessories[j].context.shouldBeDeleted = false;
                 alreadyAdded = true;
                 break;
             }
@@ -71,11 +78,24 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
             informationService
                 .setCharacteristic(Characteristic.Manufacturer, "Raumfeld / Teufel")
-                .setCharacteristic(Characteristic.Model, "");
+                .setCharacteristic(Characteristic.Model, "Raumfeld");
 
             this.addSwitchService(newAccessory);
             this.accessories.push(newAccessory);
             this.api.registerPlatformAccessories("homebridge-teufel", "Teufel", [newAccessory]);
+        }
+    }
+
+    for (var l = 0; l < knownAccessoriesLength; l++) {
+        if (this.accessories[l].context.shouldBeDeleted) {
+            try {
+                this.log("Going to delete device with name " + this.accessories[l].context.deviceName + ", not existing any more in any zone");
+                this.api.unregisterPlatformAccessories("homebridge-teufel", "Teufel", [this.accessories[l]]);
+                delete this.accessories[l];
+            }
+            catch (err) {
+                this.log("Something went wrong deleting device " + this.accessories[l].context.deviceName);
+            }
         }
     }
 }
@@ -83,7 +103,6 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
 TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
     var virtualZoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
-    var virtualZoneName = "Virtual Zone";
     var knownAccessoriesLength = this.accessories.length;
     var alreadyAdded = false;
 
@@ -92,8 +111,8 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
         if (this.accessories[j].displayName === virtualZoneName) {
             this.log("Its not a new device, but a new virtual zone, updating udn to " + virtualZoneUdn);
             for (var k = 0; k < knownAccessoriesLength; k++) {
-                    // this.log("Updating virtual zone udn for accessory " + this.accessories[k].displayName);
-                    this.accessories[k].context.zoneUdn = virtualZoneUdn;
+                // this.log("Updating virtual zone udn for accessory " + this.accessories[k].displayName);
+                this.accessories[k].context.zoneUdn = virtualZoneUdn;
             }
             alreadyAdded = true;
         }
@@ -216,10 +235,4 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
             }
         }
     }
-}
-
-TeufelPlatform.prototype.removeAccessory = function () {
-    this.log("Remove Accessory");
-    this.api.unregisterPlatformAccessories("homebridge-teufel", "Teufel", this.accessories);
-    this.accessories = [];
 }

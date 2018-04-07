@@ -1,6 +1,6 @@
 {
   "name": "homebridge-teufel",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Homebridge plugin for Teufel and Raumfeld devices support",
   "main": "index.js",
   "scripts": {
