@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.4 (2018-04-17)
+- Fixed some NullPointer and better error handling
+
 ## 0.1.3 (2018-04-07)
 - Correctly deleting speakers which do not exist anymore or have changed names
 

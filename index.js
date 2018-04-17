@@ -40,9 +40,8 @@ function TeufelPlatform(log, config, api) {
 
 TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
     var rooms = zoneConfiguration.zoneConfig.zones[0].zone[0].room;
-    var knownAccessoriesLength = this.accessories.length;
 
-    for (var k = 0; k < knownAccessoriesLength; k++) {
+    for (var k in this.accessories) {
         if (this.accessories[k].displayName === virtualZoneName) {
             this.accessories[k].context.shouldBeDeleted = false;
         } else {
@@ -51,12 +50,12 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
     }
 
     // Check for new Speakers in rooms
-    for (var i = 0; i < rooms.length; i++) {
+    for (var i in rooms) {
         var newAccessoryDisplayName = rooms[i].renderer[0].$.name;
         var alreadyAdded = false;
 
         // Check if Accessory already added
-        for (var j = 0; j < knownAccessoriesLength; j++) {
+        for (var j in this.accessories) {
             if (this.accessories[j].displayName === newAccessoryDisplayName) {
                 this.accessories[j].context.deviceName = rooms[i].renderer[0].$.name;
                 this.accessories[j].context.deviceUdn = rooms[i].renderer[0].$.udn;
@@ -86,7 +85,7 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
         }
     }
 
-    for (var l = 0; l < knownAccessoriesLength; l++) {
+    for (var l in this.accessories) {
         try {
             if (this.accessories[l].context.shouldBeDeleted) {
                 this.log("Going to delete device with name " + this.accessories[l].context.deviceName + ", not existing any more in any zone");
@@ -103,15 +102,13 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
 TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
     var virtualZoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
-    var knownAccessoriesLength = this.accessories.length;
     var alreadyAdded = false;
 
     // Check if Accessory already added
-    for (var j = 0; j < knownAccessoriesLength; j++) {
+    for (var j in this.accessories) {
         if (this.accessories[j].displayName === virtualZoneName) {
-            this.log("Its not a new device, but a new virtual zone, updating udn to " + virtualZoneUdn);
-            for (var k = 0; k < knownAccessoriesLength; k++) {
-                // this.log("Updating virtual zone udn for accessory " + this.accessories[k].displayName);
+            this.log("Updating virtual zone UDN to to " + virtualZoneUdn + " for all devices");
+            for (var k in this.accessories) {
                 this.accessories[k].context.zoneUdn = virtualZoneUdn;
             }
             alreadyAdded = true;
@@ -149,7 +146,6 @@ TeufelPlatform.prototype.configureAccessory = function (accessory) {
 TeufelPlatform.prototype.addSwitchService = function (accessory) {
     var self = this;
     accessory.on('identify', function (paired, callback) {
-        // this.log(accessory, "Identify!!!");
         callback();
     });
 
@@ -195,7 +191,7 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
         var zoneConfigProvider = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
         var zoneJson = zoneConfigProvider.zoneConfig.zones[0].zone[0];
 
-        for (var i = 0; i < zoneJson.room.length; i++) {
+        for (var i in zoneJson.room) {
             if (zoneJson.room[i].renderer[0].$.udn === zoneId) {
                 var powerstate = zoneJson.room[i].$.powerState;
                 if (powerstate !== 'ACTIVE') {
@@ -236,7 +232,7 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
                 }
             }
         } catch (err) {
-            this.log("Something went wrong while communicating with Raumfeld / Teufel devices, maybe not reachable? Waiting for automatic Udn update...")
+            this.log("Something went wrong while communicating with Raumfeld / Teufel devices, maybe not reachable? Waiting for automatic UDN update...")
         }
     }
 }
