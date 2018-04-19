@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.5 (2018-04-19)
+- Not readding devices when they have spaces in their name
+
 ## 0.1.4 (2018-04-17)
 - Fixed some NullPointer and better error handling
 

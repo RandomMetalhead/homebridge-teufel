@@ -56,10 +56,10 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
         // Check if Accessory already added
         for (var j in this.accessories) {
-            if (this.accessories[j].displayName === newAccessoryDisplayName) {
-                this.accessories[j].context.deviceName = rooms[i].renderer[0].$.name;
+            if (this.accessories[j].displayName.trim() === newAccessoryDisplayName.trim()) {
+                this.accessories[j].context.deviceName = rooms[i].renderer[0].$.name.trim();
                 this.accessories[j].context.deviceUdn = rooms[i].renderer[0].$.udn;
-                this.accessories[j].context.roomName = rooms[i].$.name;
+                this.accessories[j].context.roomName = rooms[i].$.name.trim();
                 this.accessories[j].context.roomUdn = rooms[i].$.udn;
                 this.accessories[j].context.zoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
                 this.accessories[j].context.shouldBeDeleted = false;
@@ -71,7 +71,7 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
         if (!alreadyAdded) {
             this.log("Found Teufel device " + newAccessoryDisplayName + ", processing.");
 
-            var uuid = UUIDGen.generate(rooms[i].renderer[0].$.name);
+            var uuid = UUIDGen.generate(rooms[i].renderer[0].$.name.trim());
             var newAccessory = new Accessory(newAccessoryDisplayName, uuid);
             var informationService = newAccessory.getService(Service.AccessoryInformation);
 
