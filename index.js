@@ -29,18 +29,6 @@ function TeufelPlatform(log, config, api) {
     var self = this;
 
     this.api.on('didFinishLaunching', function () {
-        self.raumkernel.on("mediaRendererRaumfeldAdded", function (_deviceUdn, _device) {
-            console.log("Device added")
-        });
-
-        self.raumkernel.on("mediaRendererRaumfeldRemoved", function (_deviceUdn, _name) {
-            console.log("Device removed")
-        });
-
-        self.raumkernel.on("deviceListChanged", function (_deviceList) {
-            console.log("Devicelist changed")
-        });
-
         self.raumkernel.on("zoneConfigurationChanged", function (zoneConfiguration) {
             if (zoneConfiguration !== null) {
                 self.addAccessory(zoneConfiguration);
