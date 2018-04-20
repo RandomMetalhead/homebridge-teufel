@@ -22,14 +22,14 @@ Will work on that in the future.
 **Start only selected devices with Homekit scene (e.g. Arriving home):**
 - Create a new Homekit scene
 - Add Raumfeld/Teufel devices you want to start **AND** the "Virtual Zone"-device
-- Activate all devices in the scene and save
+- Activate all devices and the "Virtual Zone" in the scene and save
 
 Now only the devices in the scene will start playing (for example, when you arrive at home).
 
 **Sleeping or good morning timer:**
 - Create a new automation in Homekit (for example by time or by sunrise)
 - Add Raumfeld/Teufel devices **AND** the "Virtual Zone"-device
-- Activate all devices in the scene
+- Activate all devices and the "Virtual Zone" in the scene
 - Now you can choose "deactivate after XX minutes" for the automation and save
 
 Now you devices will start playing on the set automation and will stop playing after the defined time.
