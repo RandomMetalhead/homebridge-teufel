@@ -107,7 +107,9 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
     // Check if Accessory already added
     for (var j in this.accessories) {
         if (this.accessories[j].displayName === virtualZoneName) {
-            this.log("Updating virtual zone UDN to to " + virtualZoneUdn + " for all devices");
+            this.log("Device removed or added, updating virtual zone UDN to " + virtualZoneUdn + " for all devices");
+            this.accessories[j].context.deviceUdn = virtualZoneUdn;
+
             for (var k in this.accessories) {
                 this.accessories[k].context.zoneUdn = virtualZoneUdn;
             }
@@ -129,7 +131,7 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
 
         informationService
             .setCharacteristic(Characteristic.Manufacturer, "Raumfeld / Teufel")
-            .setCharacteristic(Characteristic.Model, "");
+            .setCharacteristic(Characteristic.Model, "Virtual Zone");
 
         this.addSwitchService(newAccessory);
         this.accessories.push(newAccessory);
@@ -179,14 +181,17 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
     var name = accessory.displayName;
 
     if (name === "Virtual Zone") {
-        var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
-        virtualZoneConfigProvider.getTransportInfo().then(function (_data) {
-            if (_data.CurrentTransportState !== 'PLAYING') {
-                accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
-            } else {
-                accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
-            }
-        });
+        var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(zoneId);
+
+        if (virtualZoneConfigProvider != null) {
+            virtualZoneConfigProvider.getTransportInfo().then(function (_data) {
+                if (_data.CurrentTransportState !== 'PLAYING') {
+                    accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
+                } else {
+                    accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
+                }
+            });
+        }
     } else {
         var zoneConfigProvider = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
         var zoneJson = zoneConfigProvider.zoneConfig.zones[0].zone[0];

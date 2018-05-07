@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.0 (2018-05-08)
+- Fixed Nullpointer
+
 ## 0.1.6 (2018-04-19)
 - Not readding devices when they have spaces in their name
 
