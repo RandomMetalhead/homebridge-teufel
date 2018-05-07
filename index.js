@@ -180,13 +180,15 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
 
     if (name === "Virtual Zone") {
         var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
-        virtualZoneConfigProvider.getTransportInfo().then(function (_data) {
-            if (_data.CurrentTransportState !== 'PLAYING') {
-                accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
-            } else {
-                accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
-            }
-        });
+        if (virtualZoneConfigProvider != null) {
+            virtualZoneConfigProvider.getTransportInfo().then(function (_data) {
+                if (_data.CurrentTransportState !== 'PLAYING') {
+                    accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
+                } else {
+                    accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
+                }
+            });
+        }
     } else {
         var zoneConfigProvider = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
         var zoneJson = zoneConfigProvider.zoneConfig.zones[0].zone[0];
