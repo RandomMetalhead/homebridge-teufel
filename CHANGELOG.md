@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.8 (2018-07-23)
+- Still trying to get deletion of devices right
+
 ## 0.2.0 (2018-05-08)
 - Fixed Nullpointer
 
