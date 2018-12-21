@@ -9,16 +9,16 @@
   "author": "Marcus Thormählen <marcus@rocketguy.de> (http://rocketguy.de)",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "node-raumserver": "^0.1.4",
+    "node-raumserver": "^0.1.6",
     "request": "^2.65.0",
     "elementtree": ">=0.1.7"
   },
   "devDependencies": {
-    "homebridge": ">=0.2.0"
+    "homebridge": ">=0.2.5"
   },
   "engines": {
-    "node": ">=0.12.0",
-    "homebridge": ">=0.2.0"
+    "node": ">=6.14",
+    "homebridge": ">=0.2.5"
   },
   "repository": {
     "type": "git",
@@ -36,5 +36,4 @@
     "url": "https://github.com/RandomMetalhead/homebridge-teufel/issues"
   },
   "homepage": "https://github.com/RandomMetalhead"
-
 }
