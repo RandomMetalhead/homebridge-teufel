@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1 (2018-12-21)
+- Fixed Virtual Zone Switch
+- Updated Raumfeld server
+
 ## 0.2.8 (2018-07-23)
 - Still trying to get deletion of devices right
 

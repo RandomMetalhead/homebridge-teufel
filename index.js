@@ -108,12 +108,12 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
 
         newAccessory.context.deviceName = virtualZoneName;
         newAccessory.context.deviceUdn = virtualZoneUdn;
-        newAccessory.context.roomName = "";
-        newAccessory.context.roomUdn = "";
+        newAccessory.context.roomName = "Raumfeld";
+        newAccessory.context.roomUdn = "Raumfleld";
 
         informationService
             .setCharacteristic(Characteristic.Manufacturer, "Raumfeld / Teufel")
-            .setCharacteristic(Characteristic.Model, "Virtual Zone");
+            .setCharacteristic(Characteristic.Model, virtualZoneName);
 
         this.addSwitchService(newAccessory);
         this.accessories.push(newAccessory);
@@ -154,8 +154,11 @@ TeufelPlatform.prototype.addSwitchService = function (accessory) {
             .getCharacteristic(Characteristic.On)
             .on('get', function (callback) {
                 if (callback) callback(null, self.getSwitchState(accessory));
+                console.log("1" + self.getSwitchState(accessory));
+                console.log("2" + accessory.displayName);
             })
             .on('set', function (value, callback) {
+                console.log("3" + value);
                 if (callback) callback(null, self.changeRaumfeldState(accessory, value));
             });
     } else {
@@ -163,8 +166,11 @@ TeufelPlatform.prototype.addSwitchService = function (accessory) {
             .getCharacteristic(Characteristic.On)
             .on('get', function (callback) {
                 if (callback) callback(null, self.getSwitchState(accessory));
+                console.log("4" + self.getSwitchState(accessory));
+                console.log("5" + accessory.displayName);
             })
             .on('set', function (value, callback) {
+                console.log("6" + value);
                 if (callback) callback(null, self.changeRaumfeldState(accessory, value));
             });
     }
@@ -176,15 +182,19 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
     var zoneId = accessory.context.deviceUdn;
     var name = accessory.displayName;
 
-    if (name === "Virtual Zone") {
+    if (name === virtualZoneName) {
         var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(zoneId);
 
         if (virtualZoneConfigProvider != null) {
             virtualZoneConfigProvider.getTransportInfo().then(function (_data) {
                 if (_data.CurrentTransportState !== 'PLAYING') {
-                    accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
+                    setTimeout(function() {
+                          accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
+                    }.bind(this), 250);
                 } else {
-                    accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
+                   setTimeout(function() {
+                          accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
+                    }.bind(this), 250);
                 }
             });
         }
@@ -212,7 +222,7 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
     if (mediaRenderer !== null) {
         try {
             if (state) {
-                if (accessory.displayName === "Virtual Zone") {
+                if (accessory.displayName === virtualZoneName) {
                     mediaRenderer.play().then(function (_data) {
                     });
                 } else {
@@ -224,7 +234,7 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
                     });
                 }
             } else {
-                if (accessory.displayName === "Virtual Zone") {
+                if (accessory.displayName === virtualZoneName) {
                     mediaRenderer.stop().then(function (_data) {
                     });
                 } else {
