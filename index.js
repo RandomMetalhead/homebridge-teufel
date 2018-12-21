@@ -154,11 +154,8 @@ TeufelPlatform.prototype.addSwitchService = function (accessory) {
             .getCharacteristic(Characteristic.On)
             .on('get', function (callback) {
                 if (callback) callback(null, self.getSwitchState(accessory));
-                console.log("1" + self.getSwitchState(accessory));
-                console.log("2" + accessory.displayName);
             })
             .on('set', function (value, callback) {
-                console.log("3" + value);
                 if (callback) callback(null, self.changeRaumfeldState(accessory, value));
             });
     } else {
@@ -166,11 +163,8 @@ TeufelPlatform.prototype.addSwitchService = function (accessory) {
             .getCharacteristic(Characteristic.On)
             .on('get', function (callback) {
                 if (callback) callback(null, self.getSwitchState(accessory));
-                console.log("4" + self.getSwitchState(accessory));
-                console.log("5" + accessory.displayName);
             })
             .on('set', function (value, callback) {
-                console.log("6" + value);
                 if (callback) callback(null, self.changeRaumfeldState(accessory, value));
             });
     }
@@ -190,11 +184,11 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
                 if (_data.CurrentTransportState !== 'PLAYING') {
                     setTimeout(function() {
                           accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(0);
-                    }.bind(this), 250);
+                    }.bind(this), 1000);
                 } else {
                    setTimeout(function() {
                           accessory.getService(Service.Switch).getCharacteristic(Characteristic.On).setValue(1);
-                    }.bind(this), 250);
+                    }.bind(this), 1000);
                 }
             });
         }

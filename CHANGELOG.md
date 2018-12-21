@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.1 (2018-12-21)
+## 0.3.3 (2018-12-21)
 - Fixed Virtual Zone Switch
 - Updated Raumfeld server
 
