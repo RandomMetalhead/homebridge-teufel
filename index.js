@@ -217,8 +217,10 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
         try {
             if (state) {
                 if (accessory.displayName === virtualZoneName) {
-                    mediaRenderer.play().then(function (_data) {
-                    });
+                     setTimeout(function() {
+                        mediaRenderer.play().then(function (_data) {
+                        });
+                    }.bind(this), 3000);
                 } else {
                     mediaRenderer.leaveStandby(accessory.context.roomUdn).then(function (_data) {
                         mediaRenderer.play().then(function (_data) {

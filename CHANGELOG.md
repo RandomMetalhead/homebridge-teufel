@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.3.4 (2018-12-22)
+- Virtual Zone should always start now
+
 ## 0.3.3 (2018-12-21)
 - Fixed Virtual Zone Switch
 - Updated Raumfeld server
