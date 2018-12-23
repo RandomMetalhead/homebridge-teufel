@@ -1,6 +1,6 @@
 # Raumfeld and Teufel plugin for Homebridge
 
-This is a plugin to connect Raumfeld/Teufel hardware to Apple's Homekit via the Homebridge system.
+This is a plugin to connect Raumfeld/Teufel hardware to Apple's Homekit via the Homebridge system. Many thanks to @ChrisD for his work on Raumfeld (https://github.com/ChriD/node-raumserver).
 
 ## Currently a prototype
 This is also my first node.JS project. It is a plugin for [homebridge](https://github.com/nfarina/homebridge).
