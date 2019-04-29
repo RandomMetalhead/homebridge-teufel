@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.5 (2019-04-29)
+- New dependencies
+- No logger error on startup
+
 ## 0.3.4 (2018-12-22)
 - Virtual Zone should always start now
 

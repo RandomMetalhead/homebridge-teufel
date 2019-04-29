@@ -1,9 +1,17 @@
  'use strict';
 
 var RaumkernelLib = require('node-raumkernel');
-
 var Accessory, Service, Characteristic, UUIDGen;
 var virtualZoneName = "Virtual Zone";
+
+class MyNewLogger extends RaumkernelLib.Logger {
+ 
+    initExternalLogger()
+    {
+       // override the init of the winston logger
+      // so do not call super() here!
+    }
+}
 
 module.exports = function (homebridge) {
     Service = homebridge.hap.Service;
@@ -24,6 +32,7 @@ function TeufelPlatform(log, config, api) {
 
     // Initializing Raumfeldkernel
     this.raumkernel.createLogger();
+    this.raumkernel.parmLogger(new MyNewLogger ())
     this.raumkernel.init();
 
     var self = this;
