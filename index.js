@@ -3,13 +3,13 @@
 var RaumkernelLib = require('node-raumkernel');
 var Accessory, Service, Characteristic, UUIDGen;
 var virtualZoneName = "Virtual Zone";
+var globalConfig;
 
 class MyNewLogger extends RaumkernelLib.Logger {
  
-    initExternalLogger()
-    {
-       // override the init of the winston logger
-      // so do not call super() here!
+    initExternalLogger() {
+        // override the init of the winston logger
+        // so do not call super() here!
     }
 }
 
@@ -24,28 +24,30 @@ module.exports = function (homebridge) {
 
 function TeufelPlatform(log, config, api) {
     this.name = "Raumfeld Zone";
-    this.config = config;
     this.accessories = [];
     this.api = api;
     this.log = log;
     this.raumkernel = new RaumkernelLib.Raumkernel();
+    globalConfig = config;
 
     // Initializing Raumfeldkernel
     this.raumkernel.createLogger();
-    this.raumkernel.parmLogger(new MyNewLogger ())
+    this.raumkernel.parmLogger(new MyNewLogger())
     this.raumkernel.init();
 
     var self = this;
 
     this.api.on('didFinishLaunching', function () {
+
+        if (globalConfig['clearcache']) {
+            this.removeAllAccessories();
+        }
+
         self.raumkernel.on("zoneConfigurationChanged", function (zoneConfiguration) {
             if (zoneConfiguration !== null) {
                 self.addAccessory(zoneConfiguration);
                 self.addVirtualZone(zoneConfiguration);
             }
-        });
-        self.raumkernel.on("mediaRendererRaumfeldRemoved", function (_deviceUdn, _name) {
-	    	self.removeAccessory(_deviceUdn, _name);
         });
 
     }.bind(this));
@@ -56,14 +58,14 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
     // Check for new Speakers in rooms
     for (var i in rooms) {
-        var newAccessoryDisplayName = rooms[i].renderer[0].$.name;
+        var newAccessoryDisplayName = "Raumfeld " + rooms[i].$.name.trim();
         var alreadyAdded = false;
 
         // Check if Accessory already added
         for (var j in this.accessories) {
             if (this.accessories[j].displayName.trim() === newAccessoryDisplayName.trim()) {
-                this.accessories[j].context.deviceName = rooms[i].renderer[0].$.name.trim();
-                this.accessories[j].context.deviceUdn = rooms[i].renderer[0].$.udn;
+                this.accessories[j].context.deviceName = rooms[i].$.name.trim();
+                this.accessories[j].context.deviceUdn = rooms[i].$.udn;
                 this.accessories[j].context.roomName = rooms[i].$.name.trim();
                 this.accessories[j].context.roomUdn = rooms[i].$.udn;
                 this.accessories[j].context.zoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
@@ -88,6 +90,8 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
             this.api.registerPlatformAccessories("homebridge-teufel", "Teufel", [newAccessory]);
         }
     }
+
+    this.removeAccessories(zoneConfiguration);
 }
 
 
@@ -117,8 +121,8 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
 
         newAccessory.context.deviceName = virtualZoneName;
         newAccessory.context.deviceUdn = virtualZoneUdn;
-        newAccessory.context.roomName = "Raumfeld";
-        newAccessory.context.roomUdn = "Raumfleld";
+        newAccessory.context.roomName = virtualZoneName;
+        newAccessory.context.roomUdn = virtualZoneUdn;
 
         informationService
             .setCharacteristic(Characteristic.Manufacturer, "Raumfeld / Teufel")
@@ -130,9 +134,54 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
     }
 }
 
-TeufelPlatform.prototype.removeAccessory = function (_deviceUdn, _name) {
+TeufelPlatform.prototype.removeAllAccessories = function () {
+    var devicesToDelete = []
+
+    // Check for obsolete Speakers in rooms
+    for (var j in this.accessories) {
+        devicesToDelete.push(this.accessories[j].displayName);
+    }
+
+    for (var k in devicesToDelete) {
+        this.log("Removing device: " + devicesToDelete[k]);
+        this.removeAccessory(devicesToDelete[k]);
+    }
+}
+
+TeufelPlatform.prototype.removeAccessories = function (zoneConfiguration, config) {
+    var devicesToDelete = []
+    var rooms = zoneConfiguration.zoneConfig.zones[0].zone[0].room;
+
+    // Check for obsolete Speakers in rooms
+    for (var j in this.accessories) {
+        if (this.accessories[j].displayName !== virtualZoneName) {
+            devicesToDelete.push(this.accessories[j].displayName);
+        }
+    }
+
+    for (var i in rooms) {
+        var accessoryDisplayName = "Raumfeld " + rooms[i].$.name.trim();
+        for(var i = 0; i < devicesToDelete.length; i++){
+            if ( devicesToDelete[i] === accessoryDisplayName) {
+                devicesToDelete.splice(i, 1);
+            }
+        }
+    }
+
+    if (globalConfig['frozen']) {
+        this.log("Config frozen. Would delete " + devicesToDelete);
+    } else {
+        for (var k in devicesToDelete) {
+            this.log("Removing device: " + devicesToDelete[k]);
+            this.removeAccessory(devicesToDelete[k]);
+        }
+    }
+}
+
+TeufelPlatform.prototype.removeAccessory = function (name) {
     for (var l in this.accessories) {
-		if (this.accessories[l].context.deviceName === _name) {
+        var deviceNameToDelete = "Raumfeld " + this.accessories[l].context.deviceName;
+		if (deviceNameToDelete === name) {
             try {
                 this.log("Going to delete device with name " + this.accessories[l].context.deviceName);
                 this.api.unregisterPlatformAccessories("homebridge-teufel", "Teufel", [this.accessories[l]]);
@@ -182,11 +231,12 @@ TeufelPlatform.prototype.addSwitchService = function (accessory) {
 TeufelPlatform.prototype.getSwitchState = function (accessory) {
     var self = this;
 
-    var zoneId = accessory.context.deviceUdn;
+    var roomName = accessory.context.roomName;
+    var virtualZoneId = accessory.context.deviceUdn;
     var name = accessory.displayName;
 
     if (name === virtualZoneName) {
-        var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(zoneId);
+        var virtualZoneConfigProvider = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(virtualZoneId);
 
         if (virtualZoneConfigProvider != null) {
             virtualZoneConfigProvider.getTransportInfo().then(function (_data) {
@@ -206,7 +256,7 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
         var zoneJson = zoneConfigProvider.zoneConfig.zones[0].zone[0];
 
         for (var i in zoneJson.room) {
-            if (zoneJson.room[i].renderer[0].$.udn === zoneId) {
+            if (zoneJson.room[i].$.name === roomName) {
                 var powerstate = zoneJson.room[i].$.powerState;
                 if (powerstate !== 'ACTIVE') {
                     return false;
@@ -220,35 +270,35 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
 
 TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
     var self = this;
-    var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
 
-    if (mediaRenderer !== null) {
-        try {
-            if (state) {
-                if (accessory.displayName === virtualZoneName) {
-                     setTimeout(function() {
-                        mediaRenderer.play().then(function (_data) {
-                        });
-                    }.bind(this), 3000);
-                } else {
+    if (accessory.displayName === virtualZoneName) {
+        var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
+        if (state) {
+            setTimeout(function() {
+                mediaRenderer.play().then(function (_data) {
+                });
+             }.bind(this), 3000);
+         } else {
+            mediaRenderer.stop().then(function (_data) {});
+         }
+    } else {
+        var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.roomName);
+        if (mediaRenderer !== null) {
+            try {
+                if (state) {
                     mediaRenderer.leaveStandby(accessory.context.roomUdn).then(function (_data) {
                         mediaRenderer.play().then(function (_data) {
                             self.raumkernel.managerDisposer.zoneManager.connectRoomToZone(accessory.context.roomUdn, accessory.context.zoneUdn).then(function (_data) {
                             });
                         });
                     });
-                }
-            } else {
-                if (accessory.displayName === virtualZoneName) {
-                    mediaRenderer.stop().then(function (_data) {
-                    });
                 } else {
-                    mediaRenderer.enterManualStandby(accessory.context.roomUdn).then(function (_data) {
-                    });
-                }
+                        mediaRenderer.enterManualStandby(accessory.context.roomUdn).then(function (_data) {
+                        });
+                    }
+            } catch (err) {
+                this.log("Something went wrong while communicating with Raumfeld / Teufel devices, maybe not reachable? Waiting for automatic UDN update...")
             }
-        } catch (err) {
-            this.log("Something went wrong while communicating with Raumfeld / Teufel devices, maybe not reachable? Waiting for automatic UDN update...")
         }
     }
 }

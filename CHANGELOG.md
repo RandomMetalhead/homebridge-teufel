@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 (2019-08-30)
+- Zones based on rooms instead of devices
+- New 'clearcache' config-option to refresh caches
+- BETA! New 'frozen' config-option to prevent deleting devices
+
+
 ## 0.3.5 (2019-04-29)
 - New dependencies
 - No logger error on startup

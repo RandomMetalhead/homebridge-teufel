@@ -13,7 +13,9 @@
   "platforms": [
     {
       "platform" : "Teufel",
-      "name" : "Teufel"
+      "name" : "Teufel",
+      "frozen" : false,
+      "clearcache" : false
     }
   ]
 }
