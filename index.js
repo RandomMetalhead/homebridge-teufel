@@ -38,8 +38,8 @@ function TeufelPlatform(log, config, api) {
     var self = this;
 
     this.api.on('didFinishLaunching', function () {
-
-        if (globalConfig['clearcache']) {
+        var clearCache = globalConfig['clearcache'];
+        if (clearCache) {
             this.removeAllAccessories();
         }
 
@@ -168,7 +168,8 @@ TeufelPlatform.prototype.removeAccessories = function (zoneConfiguration, config
         }
     }
 
-    if (globalConfig['frozen']) {
+    var frozenConfig = globalConfig['frozen'];
+    if (frozenConfig) {
         this.log("Config frozen. Would delete " + devicesToDelete);
     } else {
         for (var k in devicesToDelete) {

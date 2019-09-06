@@ -5,7 +5,8 @@ This is a plugin to connect Raumfeld/Teufel hardware to Apple's Homekit via the 
 ## Currently a prototype
 This is also my first node.JS project. It is a plugin for [homebridge](https://github.com/nfarina/homebridge).
 You need a running homebridge in order to use this plugin.
-To prevent changing devices to be removed and added again in Homekit, add option 'frozen' = true to config.json. See config-sample.json. This is BETA!
+- To prevent changing devices to be removed and added again in Homekit, add option 'frozen' = true to config.json. See config-sample.json. This is BETA!
+- To remove old devices and add new devices, use 'clearcache' = true. This is BETA!
 
 ### Prerequisites
 This plugin requires at least one running Raumfeld/Teufel device in order to work.

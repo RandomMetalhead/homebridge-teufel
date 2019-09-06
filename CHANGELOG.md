@@ -1,8 +1,11 @@
 # Changelog
 
+## 0.4.2 (2019-09n-06)
+- Bugfix for Nullpointer in config
+
 ## 0.4.1 (2019-08-30)
 - Zones based on rooms instead of devices
-- New 'clearcache' config-option to refresh caches
+- New 'clearcache' config-option to delete old devices cache and create new devices
 - BETA! New 'frozen' config-option to prevent deleting devices
 
 
