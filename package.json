@@ -1,6 +1,6 @@
 {
   "name": "homebridge-teufel",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Homebridge plugin for Teufel and Raumfeld devices support",
   "main": "index.js",
   "scripts": {
@@ -9,7 +9,7 @@
   "author": "Marcus Thormählen <marcus@rocketguy.de> (https://rocketguy.de)",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "node-raumserver": "^0.1.7",
+    "node-raumserver": "^0.1.9",
     "request": "^2.65.0",
     "elementtree": ">=0.1.7"
   },

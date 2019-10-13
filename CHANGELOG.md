@@ -1,6 +1,9 @@
 # Changelog
 
-## 0.4.2 (2019-09n-06)
+## 0.4.3 (2019-13-10)
+- Bugfix for Nullpointer. Thanks to SebKranz (https://github.com/RandomMetalhead/homebridge-teufel/issues/11)
+
+## 0.4.2 (2019-09-06)
 - Bugfix for Nullpointer in config
 
 ## 0.4.1 (2019-08-30)

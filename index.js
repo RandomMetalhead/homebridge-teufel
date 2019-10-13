@@ -45,8 +45,13 @@ function TeufelPlatform(log, config, api) {
 
         self.raumkernel.on("zoneConfigurationChanged", function (zoneConfiguration) {
             if (zoneConfiguration !== null) {
-                self.addAccessory(zoneConfiguration);
-                self.addVirtualZone(zoneConfiguration);
+                if (!zoneConfiguration.zoneConfig.numRooms) {
+                    this.log("No Raumfeld Zones found")
+                    return
+                } else {
+                   self.addAccessory(zoneConfiguration);
+                   self.addVirtualZone(zoneConfiguration);
+                }
             }
         });
 
