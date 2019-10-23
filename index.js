@@ -279,13 +279,19 @@ TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
 
     if (accessory.displayName === virtualZoneName) {
         var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.deviceUdn);
-        if (state) {
-            setTimeout(function() {
-                mediaRenderer.play().then(function (_data) {
-                });
-             }.bind(this), 3000);
-         } else {
-            mediaRenderer.stop().then(function (_data) {});
+        if (mediaRenderer !== null) {
+            try {
+                if (state) {
+                    setTimeout(function() {
+                        mediaRenderer.play().then(function (_data) {
+                        });
+                     }.bind(this), 3000);
+                 } else {
+                    mediaRenderer.stop().then(function (_data) {});
+                 }
+             } catch (err) {
+                this.log("Something went wrong while communicating with Raumfeld / Teufel devices, maybe not reachable? Waiting for automatic UDN update...")
+             }
          }
     } else {
         var mediaRenderer = self.raumkernel.managerDisposer.deviceManager.getVirtualMediaRenderer(accessory.context.roomName);

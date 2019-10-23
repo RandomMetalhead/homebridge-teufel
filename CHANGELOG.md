@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.4 (2019-23-10)
+- Bugfix for Nullpointer.
+
 ## 0.4.3 (2019-13-10)
 - Bugfix for Nullpointer. Thanks to SebKranz (https://github.com/RandomMetalhead/homebridge-teufel/issues/11)
 
