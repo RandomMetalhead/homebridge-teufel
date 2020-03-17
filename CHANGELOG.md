@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.4.5 (2020-17-03)
+- Updated dependencies
+
 ## 0.4.4 (2019-23-10)
 - Bugfix for Nullpointer.
 
