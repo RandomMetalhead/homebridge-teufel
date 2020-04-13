@@ -23,8 +23,6 @@ module.exports = function (homebridge) {
 }
 
 function TeufelPlatform(log, config, api) {
-    this.log("******* ISSUE 14 DEBUG: TeufelPlatform");
-
     this.name = "Raumfeld Zone";
     this.accessories = [];
     this.api = api;
@@ -39,6 +37,7 @@ function TeufelPlatform(log, config, api) {
 
     var self = this;
 
+    this.log("******* ISSUE 14 DEBUG: TeufelPlatform");
     this.api.on('didFinishLaunching', function () {
 
         this.log("******* ISSUE 14 DEBUG: didFinishLaunching");
