@@ -38,15 +38,18 @@ function TeufelPlatform(log, config, api) {
     var self = this;
 
     this.api.on('didFinishLaunching', function () {
-        var clearCache = globalConfig['clearcache'];
-        if (clearCache) {
+
+        if (globalConfig !== null && globalConfig['clearcache'] !== null && globalConfig['clearcache']) {
             this.removeAllAccessories();
         }
 
-        self.raumkernel.on("zoneConfigurationChanged", function (zoneConfiguration) {
+        self.raumkernel.managerDisposer.zoneManager.zoneConfiguration
+        self.raumkernel.on("systemReady", function () {
+            var zoneConfiguration = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
+
             if (zoneConfiguration !== null) {
-                if (!zoneConfiguration.zoneConfig.numRooms) {
-                    this.log("No Raumfeld Zones found")
+                if (!zoneConfiguration.zoneConfig.$.numRooms) {
+                    self.log("No Raumfeld Zones found")
                     return
                 } else {
                    self.addAccessory(zoneConfiguration);
@@ -101,6 +104,7 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
 
 TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
+
     var virtualZoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
     var alreadyAdded = false;
 
@@ -173,8 +177,7 @@ TeufelPlatform.prototype.removeAccessories = function (zoneConfiguration, config
         }
     }
 
-    var frozenConfig = globalConfig['frozen'];
-    if (frozenConfig) {
+    if (globalConfig !== null && globalConfig['frozen'] !== null && globalConfig['frozen']) {
         this.log("Config frozen. Would delete " + devicesToDelete);
     } else {
         for (var k in devicesToDelete) {
