@@ -37,22 +37,19 @@ function TeufelPlatform(log, config, api) {
 
     var self = this;
 
-    this.log("******* ISSUE 14 DEBUG: TeufelPlatform");
     this.api.on('didFinishLaunching', function () {
 
-        this.log("******* ISSUE 14 DEBUG: didFinishLaunching");
-        var clearCache = globalConfig['clearcache'];
-        if (clearCache) {
+        if (globalConfig !== null && globalConfig['clearcache'] !== null && globalConfig['clearcache']) {
             this.removeAllAccessories();
         }
 
-        self.raumkernel.on("zoneConfigurationChanged", function (zoneConfiguration) {
-            this.log("******* ISSUE 14 DEBUG: zoneConfigurationChanged");
+        self.raumkernel.managerDisposer.zoneManager.zoneConfiguration
+        self.raumkernel.on("systemReady", function () {
+            var zoneConfiguration = self.raumkernel.managerDisposer.zoneManager.zoneConfiguration;
 
             if (zoneConfiguration !== null) {
-                this.log("******* ISSUE 14 DEBUG: zoneConfiguration !== null");
-                if (!zoneConfiguration.zoneConfig.numRooms) {
-                    this.log("No Raumfeld Zones found")
+                if (!zoneConfiguration.zoneConfig.$.numRooms) {
+                    self.log("No Raumfeld Zones found")
                     return
                 } else {
                    self.addAccessory(zoneConfiguration);
@@ -65,7 +62,6 @@ function TeufelPlatform(log, config, api) {
 }
 
 TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
-    this.log("******* ISSUE 14 DEBUG: addAccessory");
     var rooms = zoneConfiguration.zoneConfig.zones[0].zone[0].room;
 
     // Check for new Speakers in rooms
@@ -75,7 +71,6 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
         // Check if Accessory already added
         for (var j in this.accessories) {
-            this.log("******* ISSUE 14 DEBUG: adding accessory " + newAccessoryDisplayName.trim());
             if (this.accessories[j].displayName.trim() === newAccessoryDisplayName.trim()) {
                 this.accessories[j].context.deviceName = rooms[i].$.name.trim();
                 this.accessories[j].context.deviceUdn = rooms[i].$.udn;
@@ -109,7 +104,6 @@ TeufelPlatform.prototype.addAccessory = function (zoneConfiguration) {
 
 
 TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
-    this.log("******* ISSUE 14 DEBUG: addVirtualZone");
 
     var virtualZoneUdn = zoneConfiguration.zoneConfig.zones[0].zone[0].$.udn;
     var alreadyAdded = false;
@@ -150,7 +144,6 @@ TeufelPlatform.prototype.addVirtualZone = function (zoneConfiguration) {
 }
 
 TeufelPlatform.prototype.removeAllAccessories = function () {
-    this.log("******* ISSUE 14 DEBUG: removeAllAccessories");
     var devicesToDelete = []
 
     // Check for obsolete Speakers in rooms
@@ -165,7 +158,6 @@ TeufelPlatform.prototype.removeAllAccessories = function () {
 }
 
 TeufelPlatform.prototype.removeAccessories = function (zoneConfiguration, config) {
-    this.log("******* ISSUE 14 DEBUG: removeAccessories");
     var devicesToDelete = []
     var rooms = zoneConfiguration.zoneConfig.zones[0].zone[0].room;
 
@@ -185,8 +177,7 @@ TeufelPlatform.prototype.removeAccessories = function (zoneConfiguration, config
         }
     }
 
-    var frozenConfig = globalConfig['frozen'];
-    if (frozenConfig) {
+    if (globalConfig !== null && globalConfig['frozen'] !== null && globalConfig['frozen']) {
         this.log("Config frozen. Would delete " + devicesToDelete);
     } else {
         for (var k in devicesToDelete) {
@@ -197,7 +188,6 @@ TeufelPlatform.prototype.removeAccessories = function (zoneConfiguration, config
 }
 
 TeufelPlatform.prototype.removeAccessory = function (name) {
-    this.log("******* ISSUE 14 DEBUG: removeAccessory");
     for (var l in this.accessories) {
         var deviceNameToDelete = "Raumfeld " + this.accessories[l].context.deviceName;
 		if (deviceNameToDelete === name) {
@@ -213,14 +203,12 @@ TeufelPlatform.prototype.removeAccessory = function (name) {
 }
 
 TeufelPlatform.prototype.configureAccessory = function (accessory) {
-    this.log("******* ISSUE 14 DEBUG: configureAccessory");
     this.log(accessory.displayName, "Configure Accessory");
     this.addSwitchService(accessory);
     this.accessories.push(accessory);
 }
 
 TeufelPlatform.prototype.addSwitchService = function (accessory) {
-    this.log("******* ISSUE 14 DEBUG: addSwitchService");
     var self = this;
     accessory.on('identify', function (paired, callback) {
         callback();
@@ -250,7 +238,6 @@ TeufelPlatform.prototype.addSwitchService = function (accessory) {
 }
 
 TeufelPlatform.prototype.getSwitchState = function (accessory) {
-    this.log("******* ISSUE 14 DEBUG: getSwitchState");
     var self = this;
 
     var roomName = accessory.context.roomName;
@@ -291,7 +278,6 @@ TeufelPlatform.prototype.getSwitchState = function (accessory) {
 }
 
 TeufelPlatform.prototype.changeRaumfeldState = function (accessory, state) {
-    this.log("******* ISSUE 14 DEBUG: changeRaumfeldState");
     var self = this;
 
     if (accessory.displayName === virtualZoneName) {

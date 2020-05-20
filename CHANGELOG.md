@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.7 (2020-14-04)
+- Hopefully fixed und removed debugging for ISSUE #14
+- Updated dependencies
+
 ## 0.4.6 (2020-14-04)
 - New debugging for https://github.com/RandomMetalhead/homebridge-teufel/issues/14
 
